@@ -1,60 +1,25 @@
 // KalmanVario.h
 //
 
-#include "Bme280.h"
-
+#ifndef __KALMANVARIO_H__
+#define __KALMANVARIO_H__
 
 //
 //
 //
 
-class KalmanVario
+class KalmanFilter
 {
 public:
-	KalmanVario();
+	KalmanFilter();
 
 public:
-	int						begin(float zVariance = 400.0, float zAccelVariance = 1000.0, float zAccelBiasVariance = 1.0);
+	int						begin(float altitude, float zVariance = 400.0, float zAccelVariance = 1000.0, float zAccelBiasVariance = 1.0);
 	void					end();
 
-	int						available();
-	void					flush();
-
-	void					update();
-
-	float					getPressure() { return pressure; }
-	float					getTemperature() { return temperature; }
-	float					getAltitude2() { return z_; }
-	float					getAltitude() { return altitude; }
-	float					getCalibratedAltitude() { baroAltitude; }
-	float					getVelocity() { return v_; }
-
-	uint32_t				getTimestamp() { return t_; }
-
-	void					calibrateAltitude(float altitudeRef);
-	void					calculateSeaLevel(float altitude);
+	void					update(float altitude, float va, float* altitudeFilteredPtr, float* varioPtr);
 	
 protected:
-	static Bme280Settings vario() {
-		return {
-			.mode = Bme280Mode::Normal,
-			.temperatureOversampling = Bme280Oversampling::X2,
-			.pressureOversampling = Bme280Oversampling::X16,
-			.humidityOversampling = Bme280Oversampling::Off,
-			.filter = Bme280Filter::X16,
-			.standbyTime = Bme280StandbyTime::Ms62_5			
-		};
-	  }
-	  
-	  void					measure();
-
-protected:
-//	static void IRAM_ATTR 	TimerProc();
-
-	static KalmanVario *	mActiveVario;
-
-
-private:
 	void					init();
 
 private:
@@ -76,27 +41,6 @@ private:
 	float					zAccelBiasVariance_; // assumed fixed.
 	float					zAccelVariance_;  // dynamic acceleration variance
 	float					zVariance_; //  z measurement noise variance fixed
-
-	// timestamp
-	uint32_t				t_;
-
-	// barometer altitude
-	float					baroAltitude;
-	// altitude calibration
-	float					altitudeDrift;
-
-	//
-	int						varioUpdated;
-
-	//
-	Bme280TwoWire 			sensor;
-	float					seaLevel;
-	float					pressure;
-	float					temperature;
-	float					altitude;
-
-protected:
-//	hw_timer_t *			mTimer;
-//	SemaphoreHandle_t		mSemaphore;
-//	portMUX_TYPE			mMux;
 };
+
+#endif // __KALMANVARIO_H__

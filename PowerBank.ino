@@ -3,13 +3,15 @@
 
 #include <Wire.h>
 #include <Bme280.h>
-#include "KalmanVario.h"
+#include "Vario.h"
 
 #include <stdarg.h>
 #include <stdio.h>
 
 
-#define RUN_MODE  0
+#define RUN_MODE  0	// 0: vario mode
+					// 1: debug(monitor) mode
+					// 2: debug(graph) mode
 
 
 
@@ -51,7 +53,7 @@ void makeSentence(char* buf, float p, float v, float t)
 //
 
 #if 0
-uint32_t lastTick;
+uint32_t updateTick;
 
 void setup0()
 {
@@ -65,12 +67,12 @@ void setup0()
 	// or
 	//vario_init();
 	
-	lastTick = millis();
+	updateTick = millis();
 }
 
 void loop0()
 {
-	if (millis() - lastTick > 1000)
+	if (millis() - updateTick > 1000)
 	{
 		baro_measure();
 		//Printf("%.0f\n", baro_getAltitude() * 100);
@@ -79,7 +81,7 @@ void loop0()
 		Serial.print("A = "); Serial.println(baro_getAltitude());
 		Serial.println("");
 		
-		lastTick = millis();
+		updateTick = millis();
 	}
 	
 	// or
@@ -90,17 +92,30 @@ void loop0()
 #endif
 
 
+//////////////////////////////////////////////////////////////////////////
+//
 
-KalmanVario 		vario;
-uint32_t 			lastTick;
-uint32_t 			updateCount;
+void startTimer();
+
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+
+Vario 				vario;
 volatile uint8_t	updateFlag;
+
+uint32_t 			updateTick;
+uint32_t 			updateCount;
 
 uint8_t				ledState = 0;
 
+float				pressureFiltered;
+float				varioFiltered;
 
-void setTrigger();
 
+//////////////////////////////////////////////////////////////////////////
+//
 
 void setup() 
 {
@@ -110,11 +125,13 @@ void setup()
 	Serial.begin(9600);
 	Wire.begin();
 	vario.begin();
-	
-	setTrigger();
 
+	updateTick = millis();
 	updateCount = 0;
-	lastTick = millis();
+	pressureFiltered = vario.getPressure();
+	varioFiltered = vario.getVelocity();
+	
+	startTimer();
 }
 
 
@@ -123,9 +140,14 @@ void loop()
 	if (updateFlag != 0)
 	{
 		vario.update();
-		
-		updateCount++;
 		updateFlag = 0;
+
+		if (!vario.available())
+			return;
+
+		pressureFiltered += (vario.getPressure() - pressureFiltered) * PRESSURE_DAMPENING;
+		varioFiltered += (vario.getVelocity() - varioFiltered) * VARIO_DAMPENING;
+		updateCount++;
 	}
 
 	/*
@@ -138,14 +160,14 @@ void loop()
 	*/
 
 	#if RUN_MODE != 2
-	if (millis() - lastTick > 1000)
+	if (millis() - updateTick > NMEA_INTERVAL)
 	#else
-	if (millis() - lastTick > 100)
+	if (millis() - updateTick > 100)
 	#endif
 	{
 		#if RUN_MODE == 0
 		char buf[64];
-		makeSentence(buf, vario.getPressure(), vario.getVelocity(), vario.getTemperature());
+		makeSentence(buf, pressureFiltered, varioFiltered, vario.getTemperature());
 		Serial.print(buf);
 		#elif RUN_MODE == 1
 		Serial.print("v = "); Serial.println(vario.getVelocity());
@@ -157,8 +179,8 @@ void loop()
 		#endif
 		
 		updateCount = 0;
-		lastTick += 1000;
-		
+		updateTick += NMEA_INTERVAL;
+
 		ledState = 1 - ledState;
 		digitalWrite(13, ledState);
 	}
@@ -166,7 +188,8 @@ void loop()
 
 
 
-#if defined(TCCR1A)
+//////////////////////////////////////////////////////////////////////////
+//
 
 #define MAX_PERIOD 	0xFFFF
 
@@ -198,10 +221,10 @@ void findTopAndPrecaler(uint16_t freq, uint32_t& top, uint32_t& precaler)
 	}
 }
 
-void setTrigger()
+void startTimer()
 {
 	uint32_t top, precaler;
-	findTopAndPrecaler(50, top, precaler);
+	findTopAndPrecaler(KALMAN_UPDATE_FREQ, top, precaler);
 	
 	// precaler : 1, 8, 32, 64, 256, 1024
 	// period count:
@@ -223,10 +246,7 @@ void setTrigger()
 }
 
 
-
 ISR(TIMER1_OVF_vect) 
 {
 	updateFlag = 1;
 }
-
-#endif
