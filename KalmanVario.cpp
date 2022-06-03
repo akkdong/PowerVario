@@ -46,7 +46,7 @@ void KalmanFilter::update(float altitude, float va, float* altitudeFilteredPtr, 
 	float dt = ((float)deltaTime) / 1000.0;
 	t_ = lastTick;
 	#else
-	float dt = 1.0 / KALMAN_UPDATE_FREQ; // 100Hz
+	float dt = 1.0 / KALMAN_UPDATE_FREQ; // 25Hz
 	#endif
 
 	//

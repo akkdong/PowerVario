@@ -10,6 +10,7 @@
  */
 
 #include "KalmanFilter.h"
+#include "Common.h"
 
 #define DEBUG(...)
 
@@ -33,8 +34,8 @@ void KalmanFilter::Reset(float alt)
 void KalmanFilter::propagate(float acceleration)
 {
 	// Repeated arithmetics
-	#define dt 0.01f
-	#define _dtdt (dt * dt)
+	#define dt 			(1.0 / KALMAN_UPDATE_FREQ) // 25Hz   
+	#define _dtdt	 	(dt * dt)
 
 	// The state vector is defined as x = [h v]' where  'h' is altitude above ground and 'v' velocity, both
 	// aligned with the vertical direction of the Earth NED frame, but positive direction being upwards to zenith.
