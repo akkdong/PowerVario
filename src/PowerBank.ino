@@ -14,6 +14,13 @@
 					// 2: debug(graph) mode
 
 
+#if 1
+#include "VarioFilter_HarInAirKF2.h"
+VarioFilter_HarInAirKF2 varioFilter;
+#else
+#include "VarioFilter_RobinKF.h"
+VarioFilter_RobinKF varioFilter;
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -124,12 +131,19 @@ void setup()
 
 	Serial.begin(9600);
 	Wire.begin();
-	vario.begin();
 
+
+	#if 1
+	varioFilter.begin(400.0f, 1000.0f, 1.0f, 0);
+	#else
+	varioFilter.Configure(30.0f, 4.0f, altitude);
+	#endif
+
+	vario.begin(&varioFilter);
+
+	updateFlag = 0;
 	updateTick = millis();
 	updateCount = 0;
-	pressureFiltered = vario.getPressure();
-	varioFiltered = vario.getVelocity();
 	
 	startTimer();
 }
@@ -137,17 +151,20 @@ void setup()
 
 void loop() 
 {
-	if (updateFlag != 0)
+	int varioUpdated = vario.update();
+	if (varioUpdated > 0)
 	{
-		vario.update();
-		updateFlag = 0;
-
-		if (!vario.available())
-			return;
-
-		pressureFiltered += (vario.getPressure() - pressureFiltered) * PRESSURE_DAMPENING;
-		varioFiltered += (vario.getVelocity() - varioFiltered) * VARIO_DAMPENING;
-		updateCount++;
+		if (updateFlag == 0)
+		{
+			pressureFiltered = vario.getPressure();
+			varioFiltered = vario.getVelocity();
+			updateFlag = 1;
+		}
+		else
+		{
+			pressureFiltered += (vario.getPressure() - pressureFiltered) * PRESSURE_DAMPENING;
+			varioFiltered += (vario.getVelocity() - varioFiltered) * VARIO_DAMPENING;
+		}
 	}
 
 	/*
@@ -160,7 +177,7 @@ void loop()
 	*/
 
 	#if RUN_MODE != 2
-	if (millis() - updateTick > NMEA_INTERVAL)
+	if (updateFlag && millis() - updateTick > NMEA_INTERVAL)
 	#else
 	if (millis() - updateTick > 100)
 	#endif

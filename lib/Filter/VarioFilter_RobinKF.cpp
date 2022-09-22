@@ -4,34 +4,35 @@
  * can do whatever you want with this stuff. If we meet some day, and you think
  * this stuff is worth it, you can buy me a beer in return. - Robin Lilja
  *
- * @file altitude_kf.cpp
+ * @file VarioFilter_RobinKF.cpp
  * @author Robin Lilja
  * @date 23 Jul 2015
  */
 
-#include "KalmanFilter.h"
-#include "Common.h"
+#include "VarioFilter_RobinKF.h"
+//#include "Common.h"
 
-#define DEBUG(...)
-
-
+#define KALMAN_UPDATE_FREQ          (25)
 
 
-void KalmanFilter::Configure(float Q_accel, float R_altitude, float alt)
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+void VarioFilter_RobinKF::Configure(float Q_accel, float R_altitude, float alt)
 {
 	this->Q_accel = Q_accel;
 	this->R_altitude = R_altitude;
 
-	h = alt;
-	v = 0.0f;
+	reset(alt);
 }
 
-void KalmanFilter::Reset(float alt)
+void VarioFilter_RobinKF::Reset(float alt)
 {
 	h = alt;
 }
 
-void KalmanFilter::propagate(float acceleration)
+void VarioFilter_RobinKF::propagate(float acceleration)
 {
 	// Repeated arithmetics
 	#define dt 			(1.0 / KALMAN_UPDATE_FREQ) // 25Hz   
@@ -81,7 +82,7 @@ void KalmanFilter::propagate(float acceleration)
 	P[1][1] = P[1][1] + _Q_accel_dtdt;
 }
 
-void KalmanFilter::update(float altitude)
+void VarioFilter_RobinKF::update(float altitude)
 {
 
 	// Observation vector 'zhat' from the current state estimate:
@@ -134,7 +135,7 @@ void KalmanFilter::update(float altitude)
 	P[1][1] = P[1][1] - (K[1] * P[0][1]);
 }
 
-void KalmanFilter::Update_Propagate(float altitude, float accel, float * h, float * v)
+void VarioFilter_RobinKF::Update_Propagate(float altitude, float accel, float * h, float * v)
 {
     this->update(altitude);
     this->propagate(accel);
@@ -143,7 +144,18 @@ void KalmanFilter::Update_Propagate(float altitude, float accel, float * h, floa
     *v = this->v;
 }
 
-void KalmanFilter::Debug()
+void VarioFilter_RobinKF::Debug()
 {
-	DEBUG("P;%0.3f;%0.3f;%0.3f;%0.3f\n", this->P[0][0], this->P[0][1], this->P[1][0], this->P[1][1]);
+	//DEBUG("P;%0.3f;%0.3f;%0.3f;%0.3f\n", this->P[0][0], this->P[0][1], this->P[1][0], this->P[1][1]);
+}
+
+
+void VarioFilter_RobinKF::update(float altitude, float va, float* altitudeFiltered, float* vv)
+{
+}
+
+void VarioFilter_RobinKF::reset(float altitude)
+{
+	h = altitude;
+	v = 0.0f;
 }

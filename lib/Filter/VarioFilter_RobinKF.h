@@ -4,20 +4,25 @@
  * can do whatever you want with this stuff. If we meet some day, and you think
  * this stuff is worth it, you can buy me a beer in return. - Robin Lilja
  *
- * @file altitude_kf.h
+ * @file VarilFilter_RobinKF.h
  * @author Robin Lilja
  * @date 23 Jul 2015
  */
 
-#ifndef _ALTITUDE_KF_H_
-#define _ALTITUDE_KF_H_
+#ifndef __VARIO_FILTER_ROBINKF_H__
+#define __VARIO_FILTER_ROBINKF_H__
+
+#include "VarioFilter.h"
 
 /**
  * A linear Kalman filter estimator of altitude and vertical velocity.
  */
-class KalmanFilter {
-
+class VarioFilter_RobinKF : public IVarioFilter
+{
 public:
+	// IVarioFilter
+	void					update(float altitude, float va, float* altitudeFiltered, float* vv);
+	void					reset(float altitude);
 
 	/**
 	 * Constructor.
@@ -75,4 +80,4 @@ private:
 
 };
 
-#endif /* _ALTITUDE_KF_H_ */
+#endif // __VARIO_FILTER_ROBINKF_H__

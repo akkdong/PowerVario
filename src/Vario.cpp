@@ -9,8 +9,11 @@ Vario::Vario() : seaLevel(101325)
 }
 
 
-int Vario::begin()
+int Vario::begin(IVarioFilter* _filter)
 {
+    //
+    filter = _filter;
+
 	//
 	sensor.begin(Bme280TwoWireAddress::Primary);
 	sensor.setSettings(varioSettings());
@@ -30,13 +33,21 @@ int Vario::begin()
 	return 0;
 }
 
-void Vario::update()
+int Vario::update()
 {
     //
-    measure();
+    if (measure() < 0)
+        return -1;
+
+    altitude = (1.0 - pow(pressure / seaLevel, 1 / 5.25579)) * ((temperature + 273.15) / 0.0065);
 
     //
-    if (updateCount < 100)
+    if (updateCount == 0)
+        filter->reset(altitude);
+    else
+        filter->update(altitude, 0, &altitudeFiltered, &vario);
+
+    /*
     {
         updateCount += 1;
 
@@ -54,12 +65,20 @@ void Vario::update()
         filter.update(altitude, 0.0f, &altitudeFiltered, &vario);
         #endif
     }
+    */
 }
 
-void Vario::measure()
+int Vario::measure()
 {
+    static uint32_t lastTick = millis();
+    uint32_t curTick = millis();
+
+    if (curTick - lastTick < 1000 / 25)
+        return -1;
+    lastTick = curTick;
+
 	pressure = sensor.getPressure();
 	temperature = sensor.getTemperature();	
 	
-	altitude = (1.0 - pow(pressure / seaLevel, 0.1902949572)) * (288.15 / 0.0065); // 4433076.0	
+	return 0;
 }

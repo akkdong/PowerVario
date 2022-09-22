@@ -3,11 +3,7 @@
 
 #include "Common.h"
 #include "Bme280.h"
-#if USE_FILTER_ROBIN_LILJA
-#include "KalmanFilter.h"
-#else
-#include "KalmanVario.h"
-#endif
+#include "VarioFilter.h"
 
 //
 //
@@ -19,11 +15,10 @@ public:
 	Vario();
 
 public:
-	int						begin();
+	int						begin(IVarioFilter* filter);
 	void					end();
 
-	int						available() { return updateCount < 100 ? 0 : 1; }
-	void					update();
+	int						update();
 
 	float					getPressure() { return pressure; }
 	float					getTemperature() { return temperature; }
@@ -48,7 +43,7 @@ protected:
 		};
 	  }
 	  
-	  void					measure();
+	int 					measure();
 
 protected:
     //
@@ -59,14 +54,10 @@ protected:
 	float					seaLevel;
 	float					pressure;
 	float					temperature;
-	float					altitude;
+	float					altitude;	
 
     // filter
-    #if USE_FILTER_ROBIN_LILJA
-    KalmanFilter            filter;
-    #else
-    KalmanFilter            filter;
-    #endif
+    IVarioFilter *          filter;
 
     // vario
 	int						updateCount;
