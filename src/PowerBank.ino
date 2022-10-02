@@ -154,6 +154,7 @@ void loop()
 	int varioUpdated = vario.update();
 	if (varioUpdated > 0)
 	{
+		/*
 		if (updateFlag == 0)
 		{
 			pressureFiltered = vario.getPressure();
@@ -165,6 +166,16 @@ void loop()
 			pressureFiltered += (vario.getPressure() - pressureFiltered) * PRESSURE_DAMPENING;
 			varioFiltered += (vario.getVelocity() - varioFiltered) * VARIO_DAMPENING;
 		}
+		*/
+
+		#if 0
+		pressureFiltered += (vario.getPressure() - pressureFiltered) * PRESSURE_DAMPENING;
+		varioFiltered += (vario.getVelocity() - varioFiltered) * VARIO_DAMPENING;
+		#else
+		pressureFiltered += vario.getPressure();
+		varioFiltered += vario.getVelocity();
+		updateCount += 1;
+		#endif
 	}
 
 	/*
@@ -177,11 +188,14 @@ void loop()
 	*/
 
 	#if RUN_MODE != 2
-	if (updateFlag && millis() - updateTick > NMEA_INTERVAL)
+	if (varioUpdated > 0 && millis() - updateTick > NMEA_INTERVAL)
 	#else
 	if (millis() - updateTick > 100)
 	#endif
 	{
+		pressureFiltered /= updateCount;
+		varioFiltered /= updateCount;
+
 		#if RUN_MODE == 0
 		char buf[64];
 		makeSentence(buf, pressureFiltered, varioFiltered, vario.getTemperature());
@@ -195,6 +209,8 @@ void loop()
 		Serial.println(vario.getVelocity() * 100.0, 2);
 		#endif
 		
+		pressureFiltered = 0;
+		varioFiltered = 0;
 		updateCount = 0;
 		updateTick += NMEA_INTERVAL;
 

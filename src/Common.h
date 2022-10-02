@@ -5,7 +5,7 @@
 #define __COMMON_H__
 
 #define KALMAN_UPDATE_FREQ          (25)
-#define NMEA_INTERVAL               (1000)
+#define NMEA_INTERVAL               (1000 / 5)  // 5Hz
 
 #define USE_FILTER_ROBIN_LILJA      (1)
 

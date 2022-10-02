@@ -47,25 +47,19 @@ int Vario::update()
     else
         filter->update(altitude, 0, &altitudeFiltered, &vario);
 
-    /*
-    {
-        updateCount += 1;
+#if 0
+    Serial.print(pressure);
+    Serial.print(", ");
+    Serial.print(altitude);
+    Serial.print(", ");
+    Serial.print(altitudeFiltered);
+    Serial.print(", ");
+    Serial.println(vario);
+#endif
 
-        #if USE_FILTER_ROBIN_LILJA
-        filter.Configure(30.0f, 4.0f, altitude);
-        #else
-        filter.begin(altitude, 400.0f, 1000.0f, 1.0f);
-        #endif
-    }
-    else
-    {
-        #if USE_FILTER_ROBIN_LILJA
-        filter.Update_Propagate(altitude, 0.0f, &altitudeFiltered, &vario);
-        #else
-        filter.update(altitude, 0.0f, &altitudeFiltered, &vario);
-        #endif
-    }
-    */
+    updateCount += 1;
+
+    return 1;
 }
 
 int Vario::measure()
@@ -77,8 +71,8 @@ int Vario::measure()
         return -1;
     lastTick = curTick;
 
-	pressure = sensor.getPressure();
 	temperature = sensor.getTemperature();	
+	pressure = sensor.getPressure();
 	
 	return 0;
 }

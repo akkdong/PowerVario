@@ -34,7 +34,7 @@ int VarioFilter_HarInAirKF2::begin(float zVariance, float zAccelVariance, float 
 void VarioFilter_HarInAirKF2::update(float altitude, float va, float* altitudeFilteredPtr, float* varioPtr)
 {
 	// delta time
-	#if 1
+	#if 0
 	uint32_t lastTick = millis();
 	float dt = ((float)(lastTick - t_)) / 1000.0;
 	t_ = lastTick;
