@@ -1,8 +1,8 @@
-// VarioFilter_HarInAirKF2.cpp
+// VarioFilter_HarInAirKF3.cpp
 //
 
 #include <Arduino.h>
-#include "VarioFilter_HarInAirKF2.h"
+#include "VarioFilter_HarInAirKF3.h"
 
 
 #define KALMAN_UPDATE_FREQ          (25)
@@ -13,12 +13,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-VarioFilter_HarInAirKF2::VarioFilter_HarInAirKF2()
+VarioFilter_HarInAirKF3::VarioFilter_HarInAirKF3()
 {
 }
 
 
-int VarioFilter_HarInAirKF2::begin(float zVariance, float zAccelVariance, float zAccelBiasVariance, float altitude)
+int VarioFilter_HarInAirKF3::begin(float zVariance, float zAccelVariance, float zAccelBiasVariance, float altitude)
 {
 	// init values
 	zAccelVariance_ = zAccelVariance;
@@ -31,7 +31,7 @@ int VarioFilter_HarInAirKF2::begin(float zVariance, float zAccelVariance, float 
 	return 0;
 }
 
-void VarioFilter_HarInAirKF2::update(float altitude, float va, float* altitudeFilteredPtr, float* varioPtr)
+void VarioFilter_HarInAirKF3::update(float altitude, float va, float* altitudeFilteredPtr, float* varioPtr)
 {
 	// delta time
 	#if 0
@@ -121,7 +121,7 @@ void VarioFilter_HarInAirKF2::update(float altitude, float va, float* altitudeFi
 	Pza_ -= kz * Pza_;
 }
 
-void VarioFilter_HarInAirKF2::reset(float altitude)
+void VarioFilter_HarInAirKF3::reset(float altitude)
 {
 	z_ = altitude;
 	v_ = 0.0f; // vInitial;

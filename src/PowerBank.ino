@@ -15,8 +15,8 @@
 
 
 #if 1
-#include "VarioFilter_HarInAirKF2.h"
-VarioFilter_HarInAirKF2 varioFilter;
+#include "VarioFilter_HarInAirKF3.h"
+VarioFilter_HarInAirKF3 varioFilter;
 #else
 #include "VarioFilter_RobinKF.h"
 VarioFilter_RobinKF varioFilter;
@@ -134,7 +134,7 @@ void setup()
 
 
 	#if 1
-	varioFilter.begin(400.0f, 1000.0f, 1.0f, 0);
+	varioFilter.begin(500.0f, 8000.0f, 1.0f, 0);
 	#else
 	varioFilter.Configure(30.0f, 4.0f, altitude);
 	#endif

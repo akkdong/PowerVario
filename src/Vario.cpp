@@ -21,7 +21,7 @@ int Vario::begin(IVarioFilter* _filter)
 	//
     for (int i = 0; i < 100; i ++)
     {
-        delay(10);
+        delay(1000 / 25);
         measure();
     }
 
@@ -44,10 +44,9 @@ int Vario::update()
     //
     if (updateCount == 0)
         filter->reset(altitude);
-    else
-        filter->update(altitude, 0, &altitudeFiltered, &vario);
+    filter->update(altitude, 0, &altitudeFiltered, &vario);
 
-#if 0
+#if DBG_PRINT
     Serial.print(pressure);
     Serial.print(", ");
     Serial.print(altitude);
@@ -59,7 +58,7 @@ int Vario::update()
 
     updateCount += 1;
 
-    return 1;
+    return updateCount;
 }
 
 int Vario::measure()

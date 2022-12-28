@@ -1,4 +1,4 @@
-// VarioFilter_HarInAirKF2.h
+// VarioFilter_HarInAirKF3.h
 //
 
 //
@@ -16,10 +16,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-class VarioFilter_HarInAirKF2 : public IVarioFilter
+class VarioFilter_HarInAirKF3 : public IVarioFilter
 {
 public:
-	VarioFilter_HarInAirKF2();
+	VarioFilter_HarInAirKF3();
 
 public:
 	// IVarioFilter

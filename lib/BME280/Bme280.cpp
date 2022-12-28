@@ -61,7 +61,7 @@ float AbstractBme280::getTemperature() const {
 }
 
 float AbstractBme280::getPressure() const {
-  getTemperature();
+  //getTemperature();
 
   int32_t rawPressure = read24(Bme280RegisterAddressPressureData);
   if (rawPressure == 0x800000) {

@@ -38,7 +38,7 @@ protected:
 			.temperatureOversampling = Bme280Oversampling::X2,
 			.pressureOversampling = Bme280Oversampling::X16,
 			.humidityOversampling = Bme280Oversampling::Off,
-			.filter = Bme280Filter::Off,
+			.filter = Bme280Filter::X16,
 			.standbyTime = Bme280StandbyTime::Ms0_5			
 		};
 	  }
